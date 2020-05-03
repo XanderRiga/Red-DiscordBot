@@ -5,6 +5,7 @@ import dotenv
 from .ir_webstats_rc.client import iRWebStats
 from .ir_webstats_rc.responses.last_races_stats import LastRacesStats
 from .ir_webstats_rc.responses.yearly_stats import YearlyStats
+from .ir_webstats_rc.responses.career_stats import CareerStats
 
 dotenv.load_dotenv()
 
@@ -26,12 +27,49 @@ class Iracing(commands.Cog):
 
     @commands.command()
     async def yearlystats(self, ctx, *, iracing_id):
-        """Gives the recent race data from the iRacing ID they passed in"""
+        """Gives the yearly data from the iRacing ID they passed in"""
         response = irw.yearly_stats(iracing_id)
 
         yearly_stats = map(lambda x: YearlyStats(x), response)
 
         await ctx.send(print_yearly_stats(yearly_stats, iracing_id))
+
+    @commands.command()
+    async def careerstats(self, ctx, *, iracing_id):
+        """Gives the career data from the iRacing ID they passed in"""
+        response = irw.career_stats(iracing_id)
+
+        career_stats = map(lambda x: CareerStats(x), response)
+
+        await ctx.send(print_career_stats(career_stats, iracing_id))
+
+
+def print_career_stats(career_stats, iracing_id):
+    string = 'Career Data for user: ' + str(iracing_id) + '\n\n'
+    string += 'Category'.ljust(10) + \
+              'Starts'.ljust(8) + \
+              'Top 5s'.ljust(8) + \
+              'Wins'.ljust(8) + \
+              'Avg Start'.ljust(12) + \
+              'Avg Finish'.ljust(12) + \
+              'Avg Incidents'.ljust(15) + \
+              'Top 5 Percentage'.ljust(18) + \
+              'Win Percentage'.ljust(16) + '\n'
+    string += '--------------------------------------------------------------------' \
+              '---------------------------------------------\n'
+
+    for career_stat in career_stats:
+        string += career_stat.category.ljust(10) + \
+                  str(career_stat.starts).ljust(8) + \
+                  str(career_stat.top5).ljust(8) + \
+                  str(career_stat.wins).ljust(8) + \
+                  str(career_stat.avgStart).ljust(12) + \
+                  str(career_stat.avgFinish).ljust(12) + \
+                  str(career_stat.avgIncPerRace).ljust(15) + \
+                  str(career_stat.top5Percentage).ljust(18) + \
+                  str(career_stat.winPercentage).ljust(16) + '\n'
+
+    return add_backticks(string)
 
 
 def print_yearly_stats(yearly_stats, iracing_id):
