@@ -4,6 +4,7 @@ import sys
 import dotenv
 from .ir_webstats_rc.client import iRWebStats
 from .ir_webstats_rc.responses.last_races_stats import LastRacesStats
+
 dotenv.load_dotenv()
 
 irw = iRWebStats()
@@ -24,7 +25,7 @@ class Iracing(commands.Cog):
 
 
 def print_recent_races(recent_races, iracing_id):
-    string = '```Recent Races Data for user: ' + str(iracing_id) + '\n\n'
+    string = 'Recent Races Data for user: ' + str(iracing_id) + '\n\n'
     string += 'Finish'.ljust(8) + \
               'Start'.ljust(8) + \
               'Incidents'.ljust(11) + \
@@ -39,5 +40,8 @@ def print_recent_races(recent_races, iracing_id):
                   recent_race.date.ljust(15) + \
                   recent_race.trackName.ljust(30) + '\n'
 
-    string += '```'
-    return string
+    return add_backticks(string)
+
+
+def add_backticks(string):
+    return '```' + string + '```'
