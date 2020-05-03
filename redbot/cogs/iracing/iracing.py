@@ -39,12 +39,12 @@ def print_yearly_stats(yearly_stats, iracing_id):
     string += 'Year'.ljust(6) + \
               'Category'.ljust(10) + \
               'Starts'.ljust(8) + \
+              'Top 5s'.ljust(8) + \
+              'Wins'.ljust(8) + \
               'Avg Start'.ljust(12) + \
               'Avg Finish'.ljust(12) + \
               'Avg Incidents'.ljust(15) + \
-              'Top 5s'.ljust(8) + \
               'Top 5 Percentage'.ljust(18) + \
-              'Wins'.ljust(8) + \
               'Win Percentage'.ljust(16) + '\n'
     string += '--------------------------------------------------------------------' \
               '---------------------------------------------\n'
@@ -53,12 +53,12 @@ def print_yearly_stats(yearly_stats, iracing_id):
         string += str(yearly_stat.year).ljust(6) + \
                   yearly_stat.category.ljust(10) + \
                   str(yearly_stat.starts).ljust(8) + \
+                  str(yearly_stat.top5).ljust(8) + \
+                  str(yearly_stat.wins).ljust(8) + \
                   str(yearly_stat.avgStart).ljust(12) + \
                   str(yearly_stat.avgFinish).ljust(12) + \
                   str(yearly_stat.avgIncPerRace).ljust(15) + \
-                  str(yearly_stat.top5).ljust(8) + \
                   str(yearly_stat.top5Percentage).ljust(18) + \
-                  str(yearly_stat.wins).ljust(8) + \
                   str(yearly_stat.winPercentage).ljust(16) + '\n'
 
     return add_backticks(string)
