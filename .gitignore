@@ -141,3 +141,5 @@ ENV/
 
 # Pre-commit hooks
 /.pre-commit-config.yaml
+
+cookie.tmp
