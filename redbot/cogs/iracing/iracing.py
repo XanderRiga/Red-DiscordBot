@@ -75,8 +75,8 @@ def print_recent_races(recent_races, iracing_id):
     string += '---------------------------------------------------------------------------------\n'
 
     for recent_race in recent_races:
-        string += 'P' + str(recent_race.finishPos).ljust(8) + \
-                  'P' + str(recent_race.startPos).ljust(8) + \
+        string += ('P' + str(recent_race.finishPos)).ljust(8) + \
+                  ('P' + str(recent_race.startPos)).ljust(8) + \
                   str(recent_race.incidents).ljust(11) + \
                   str(recent_race.strengthOfField).ljust(13) + \
                   recent_race.date.ljust(15) + \
