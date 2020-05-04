@@ -21,7 +21,13 @@ class Iracing(commands.Cog):
         """Gives the recent race data from the iRacing ID they passed in"""
         response = irw.lastrace_stats(iracing_id)
 
+        print('recent races data for user: ' + iracing_id)
+        print(response)
+
         races_stats_list = map(lambda x: LastRacesStats(x), response)
+
+        for race in races_stats_list:
+            print(race.incidents)
 
         await ctx.send(print_recent_races(races_stats_list, iracing_id))
 
