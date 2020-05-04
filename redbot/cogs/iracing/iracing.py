@@ -112,9 +112,6 @@ def print_recent_races(recent_races, iracing_id):
               'Track Name'.ljust(30) + '\n'
     string += '---------------------------------------------------------------------------------\n'
 
-    print('string so far')
-    print(string)
-
     for recent_race in recent_races:
         string += ('P' + str(recent_race.finishPos)).ljust(8) + \
                   ('P' + str(recent_race.startPos)).ljust(8) + \
@@ -122,9 +119,6 @@ def print_recent_races(recent_races, iracing_id):
                   str(recent_race.strengthOfField).ljust(13) + \
                   recent_race.date.ljust(15) + \
                   recent_race.trackName.ljust(30) + '\n'
-
-        print('string after iteration')
-        print(string)
 
     return add_backticks(string)
 
