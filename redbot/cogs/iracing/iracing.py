@@ -14,6 +14,8 @@ dotenv.load_dotenv()
 irw = iRWebStats()
 irw.login(os.getenv("IRACING_USERNAME"), os.getenv("IRACING_PASSWORD"))
 
+all_series = irw.all_seasons()
+
 
 class Iracing(commands.Cog):
     """A cog that can give iRacing data about users"""
@@ -106,6 +108,14 @@ class Iracing(commands.Cog):
         await ctx.send('Successfully updated user data')
 
 
+def get_series_name(series_id):
+    for series in all_series:
+        if series.seriesId == series_id:
+            return series.name
+
+    return ""
+
+
 def update_user_data(user_id, guild_id, iracing_id):
     races_stats_dict = irw.lastrace_stats(iracing_id)
     yearly_stats_dict = irw.yearly_stats(iracing_id)
@@ -189,8 +199,10 @@ def print_recent_races(recent_races, iracing_id):
               'Incidents'.ljust(11) + \
               'Avg iRating'.ljust(13) + \
               'Race Date'.ljust(15) + \
+              'Series'.ljust(30) + \
               'Track Name'.ljust(30) + '\n'
-    string += '---------------------------------------------------------------------------------\n'
+    string += '------------------------------------------------------------------------------------' \
+              '-----------------------\n '
 
     for recent_race in recent_races:
         string += ('P' + str(recent_race.finishPos)).ljust(8) + \
@@ -198,6 +210,7 @@ def print_recent_races(recent_races, iracing_id):
                   str(recent_race.incidents).ljust(11) + \
                   str(recent_race.strengthOfField).ljust(13) + \
                   recent_race.date.ljust(15) + \
+                  get_series_name(recent_race.seriesID).ljust(30) + \
                   recent_race.trackName.ljust(30) + '\n'
 
     return add_backticks(string)
