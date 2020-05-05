@@ -83,11 +83,12 @@ class Iracing(commands.Cog):
     @commands.command()
     async def saveid(self, ctx, *, iracing_id):
         """Save your iRacing ID with to your Discord ID"""
-
         user_id = str(ctx.author.id)
         guild_id = str(ctx.guild.id)
 
         save_iracing_id(user_id, guild_id, iracing_id)
+
+        try_save_irating(user_id, guild_id)
 
         await ctx.send('iRacing ID successfully saved')
 
@@ -108,18 +109,21 @@ class Iracing(commands.Cog):
         await ctx.send('Successfully updated user data')
 
 
-def get_series_name(series_id):
-    for series in all_series:
-        if series.seriesId == series_id:
-            return series.name
+def try_save_irating(user_id, guild_id):
+    iracing_id = get_user_iracing_id(user_id, guild_id)
+    irating = road_irating(iracing_id)
+    if not irating:
+        return
 
-    return ""
+    save_road_irating(user_id, guild_id, irating)
 
 
 def update_user_data(user_id, guild_id, iracing_id):
     races_stats_dict = irw.lastrace_stats(iracing_id)
     yearly_stats_dict = irw.yearly_stats(iracing_id)
     career_stats_dict = irw.career_stats(iracing_id)
+
+    try_save_irating(user_id, guild_id)
 
     if races_stats_dict:
         races_stats_list = map(lambda x: LastRacesStats(x), races_stats_dict)
@@ -132,6 +136,21 @@ def update_user_data(user_id, guild_id, iracing_id):
     if career_stats_dict:
         career_stats_list = map(lambda x: CareerStats(x), career_stats_dict)
         update_user(user_id, guild_id, copy.deepcopy(career_stats_list), None, None)
+
+
+def road_irating(user_id):
+    chart = irw.iratingchart(user_id)
+    if not isinstance(chart, list) or not isinstance(chart[-1], list):
+        return None
+    return str(chart[-1][-1])
+
+
+def get_series_name(series_id):
+    for series in all_series:
+        if series.seriesId == series_id:
+            return series.name
+
+    return ""
 
 
 def print_career_stats(career_stats, iracing_id):

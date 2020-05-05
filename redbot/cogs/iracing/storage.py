@@ -4,6 +4,15 @@ import os
 folder = './data/'
 
 
+def save_road_irating(user_id, guild_id, irating):
+    ensure_file_exists(guild_id)
+
+    user_data = get_user_data(user_id, guild_id) or {}
+    user_data['road_irating'] = irating
+
+    set_user_data(user_id, guild_id, user_data)
+
+
 def save_iracing_id(user_id, guild_id, iracing_id):
     ensure_file_exists(guild_id)
 
