@@ -19,11 +19,18 @@ class Iracing(commands.Cog):
     """A cog that can give iRacing data about users"""
 
     @commands.command()
-    async def recentraces(self, ctx, *, iracing_id):
+    async def recentraces(self, ctx, *, iracing_id=None):
         """Gives the recent race data from the iRacing ID passed in"""
-        response = irw.lastrace_stats(iracing_id)
         user_id = str(ctx.author.id)
         guild_id = str(ctx.guild.id)
+        if not iracing_id:
+            iracing_id = get_user_iracing_id(user_id, guild_id)
+            if not iracing_id:
+                await ctx.send('Please send an iRacing ID after the command or link your own with `!saveid <iRacing '
+                               'ID>`')
+                return
+
+        response = irw.lastrace_stats(iracing_id)
 
         races_stats_list = map(lambda x: LastRacesStats(x), response)
 
@@ -32,11 +39,18 @@ class Iracing(commands.Cog):
         await ctx.send(print_recent_races(races_stats_list, iracing_id))
 
     @commands.command()
-    async def yearlystats(self, ctx, *, iracing_id):
+    async def yearlystats(self, ctx, *, iracing_id=None):
         """Gives the yearly data from the iRacing ID passed in"""
-        response = irw.yearly_stats(iracing_id)
         user_id = str(ctx.author.id)
         guild_id = str(ctx.guild.id)
+        if not iracing_id:
+            iracing_id = get_user_iracing_id(user_id, guild_id)
+            if not iracing_id:
+                await ctx.send('Please send an iRacing ID after the command or link your own with `!saveid <iRacing '
+                               'ID>`')
+                return
+
+        response = irw.yearly_stats(iracing_id)
 
         yearly_stats = map(lambda x: YearlyStats(x), response)
 
@@ -45,11 +59,18 @@ class Iracing(commands.Cog):
         await ctx.send(print_yearly_stats(yearly_stats, iracing_id))
 
     @commands.command()
-    async def careerstats(self, ctx, *, iracing_id):
+    async def careerstats(self, ctx, *, iracing_id=None):
         """Gives the career data from the iRacing ID passed in"""
-        response = irw.career_stats(iracing_id)
         user_id = str(ctx.author.id)
         guild_id = str(ctx.guild.id)
+        if not iracing_id:
+            iracing_id = get_user_iracing_id(user_id, guild_id)
+            if not iracing_id:
+                await ctx.send('Please send an iRacing ID after the command or link your own with `!saveid <iRacing '
+                               'ID>`')
+                return
+
+        response = irw.career_stats(iracing_id)
 
         career_stats = map(lambda x: CareerStats(x), response)
 

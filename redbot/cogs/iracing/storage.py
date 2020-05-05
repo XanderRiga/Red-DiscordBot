@@ -51,14 +51,21 @@ def get_dict_of_data(guild_id):
 
 
 def get_user_data(user_id, guild_id):
-    ensure_file_exists(guild_id)
+    dictionary = get_dict_of_data(guild_id)
 
-    with open(file_path(guild_id), 'r') as file:
-        dictionary = json.load(file)
-        if user_id in dictionary:
-            return dictionary[user_id]
-        else:
-            return None
+    if user_id in dictionary:
+        return dictionary[user_id]
+    else:
+        return None
+
+
+def get_user_iracing_id(user_id, guild_id):
+    user_data = get_user_data(user_id, guild_id)
+
+    if not user_data or 'iracing_id' not in user_data:
+        return None
+
+    return user_data['iracing_id']
 
 
 def ensure_file_exists(guild_id):
