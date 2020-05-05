@@ -6,6 +6,8 @@ from .ir_webstats_rc.client import iRWebStats
 from .ir_webstats_rc.responses.last_races_stats import LastRacesStats
 from .ir_webstats_rc.responses.yearly_stats import YearlyStats
 from .ir_webstats_rc.responses.career_stats import CareerStats
+from .storage import *
+import copy
 
 dotenv.load_dotenv()
 
@@ -18,30 +20,53 @@ class Iracing(commands.Cog):
 
     @commands.command()
     async def recentraces(self, ctx, *, iracing_id):
-        """Gives the recent race data from the iRacing ID they passed in"""
+        """Gives the recent race data from the iRacing ID passed in"""
         response = irw.lastrace_stats(iracing_id)
+        user_id = str(ctx.author.id)
+        guild_id = str(ctx.guild.id)
 
         races_stats_list = map(lambda x: LastRacesStats(x), response)
+
+        update_user(user_id, guild_id, None, None, copy.deepcopy(races_stats_list))
 
         await ctx.send(print_recent_races(races_stats_list, iracing_id))
 
     @commands.command()
     async def yearlystats(self, ctx, *, iracing_id):
-        """Gives the yearly data from the iRacing ID they passed in"""
+        """Gives the yearly data from the iRacing ID passed in"""
         response = irw.yearly_stats(iracing_id)
+        user_id = str(ctx.author.id)
+        guild_id = str(ctx.guild.id)
 
         yearly_stats = map(lambda x: YearlyStats(x), response)
+
+        update_user(user_id, guild_id, None, copy.deepcopy(yearly_stats), None)
 
         await ctx.send(print_yearly_stats(yearly_stats, iracing_id))
 
     @commands.command()
     async def careerstats(self, ctx, *, iracing_id):
-        """Gives the career data from the iRacing ID they passed in"""
+        """Gives the career data from the iRacing ID passed in"""
         response = irw.career_stats(iracing_id)
+        user_id = str(ctx.author.id)
+        guild_id = str(ctx.guild.id)
 
         career_stats = map(lambda x: CareerStats(x), response)
 
+        update_user(user_id, guild_id, copy.deepcopy(career_stats), None, None)
+
         await ctx.send(print_career_stats(career_stats, iracing_id))
+
+    @commands.command()
+    async def saveid(self, ctx, *, iracing_id):
+        """Save your iRacing ID with to your Discord ID"""
+
+        user_id = str(ctx.author.id)
+        guild_id = str(ctx.guild.id)
+
+        save_iracing_id(user_id, guild_id, iracing_id)
+
+        await ctx.send('iRacing ID successfully saved')
 
 
 def print_career_stats(career_stats, iracing_id):
