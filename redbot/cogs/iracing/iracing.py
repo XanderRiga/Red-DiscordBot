@@ -89,6 +89,40 @@ class Iracing(commands.Cog):
 
         await ctx.send('iRacing ID successfully saved')
 
+    # @commands.command()
+    # async def leaderboard(self, ctx):
+    #     guild_dict = get_dict_of_data(ctx.guild.id)
+    #     for user_id, user_data in guild_dict.items():
+    #         pass
+
+    @commands.command()
+    async def update(self, ctx):
+        guild_id = ctx.guild.id
+        guild_dict = get_dict_of_data(guild_id)
+        for user_id in guild_dict:
+            if 'iracing_id' in guild_dict[user_id]:
+                update_user_data(user_id, guild_id, (guild_dict[user_id]['iracing_id']))
+
+        await ctx.send('Successfully updated user data')
+
+
+def update_user_data(user_id, guild_id, iracing_id):
+    races_stats_dict = irw.lastrace_stats(iracing_id)
+    yearly_stats_dict = irw.yearly_stats(iracing_id)
+    career_stats_dict = irw.career_stats(iracing_id)
+
+    if races_stats_dict:
+        races_stats_list = map(lambda x: LastRacesStats(x), races_stats_dict)
+        update_user(user_id, guild_id, None, None, copy.deepcopy(races_stats_list))
+
+    if yearly_stats_dict:
+        yearly_stats_list = map(lambda x: YearlyStats(x), yearly_stats_dict)
+        update_user(user_id, guild_id, None, copy.deepcopy(yearly_stats_list), None)
+
+    if career_stats_dict:
+        career_stats_list = map(lambda x: CareerStats(x), career_stats_dict)
+        update_user(user_id, guild_id, copy.deepcopy(career_stats_list), None, None)
+
 
 def print_career_stats(career_stats, iracing_id):
     string = 'Career Data for user: ' + str(iracing_id) + '\n\n'
@@ -99,10 +133,10 @@ def print_career_stats(career_stats, iracing_id):
               'Avg Start'.ljust(12) + \
               'Avg Finish'.ljust(12) + \
               'Avg Incidents'.ljust(15) + \
-              'Top 5 Percentage'.ljust(18) + \
-              'Win Percentage'.ljust(16) + '\n'
+              'Top 5 %'.ljust(9) + \
+              'Win %'.ljust(8) + '\n'
     string += '--------------------------------------------------------------------' \
-              '---------------------------------------------\n'
+              '---------------------\n'
 
     for career_stat in career_stats:
         string += career_stat.category.ljust(10) + \
@@ -112,8 +146,8 @@ def print_career_stats(career_stats, iracing_id):
                   str(career_stat.avgStart).ljust(12) + \
                   str(career_stat.avgFinish).ljust(12) + \
                   str(career_stat.avgIncPerRace).ljust(15) + \
-                  str(career_stat.top5Percentage).ljust(18) + \
-                  str(career_stat.winPercentage).ljust(16) + '\n'
+                  str(career_stat.top5Percentage).ljust(9) + \
+                  str(career_stat.winPercentage).ljust(8) + '\n'
 
     return add_backticks(string)
 
@@ -128,10 +162,10 @@ def print_yearly_stats(yearly_stats, iracing_id):
               'Avg Start'.ljust(12) + \
               'Avg Finish'.ljust(12) + \
               'Avg Incidents'.ljust(15) + \
-              'Top 5 Percentage'.ljust(18) + \
-              'Win Percentage'.ljust(16) + '\n'
+              'Top 5 %'.ljust(9) + \
+              'Win %'.ljust(7) + '\n'
     string += '--------------------------------------------------------------------' \
-              '---------------------------------------------\n'
+              '---------------------------\n'
 
     for yearly_stat in yearly_stats:
         string += str(yearly_stat.year).ljust(6) + \
@@ -142,8 +176,8 @@ def print_yearly_stats(yearly_stats, iracing_id):
                   str(yearly_stat.avgStart).ljust(12) + \
                   str(yearly_stat.avgFinish).ljust(12) + \
                   str(yearly_stat.avgIncPerRace).ljust(15) + \
-                  str(yearly_stat.top5Percentage).ljust(18) + \
-                  str(yearly_stat.winPercentage).ljust(16) + '\n'
+                  str(yearly_stat.top5Percentage).ljust(9) + \
+                  str(yearly_stat.winPercentage).ljust(7) + '\n'
 
     return add_backticks(string)
 
