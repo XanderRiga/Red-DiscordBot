@@ -33,11 +33,7 @@ class Iracing(commands.Cog):
                                'ID>`')
                 return
 
-        response = irw.lastrace_stats(iracing_id)
-
-        races_stats_list = map(lambda x: LastRacesStats(x), response)
-
-        update_user(user_id, guild_id, None, None, copy.deepcopy(races_stats_list))
+        races_stats_list = update_last_races(user_id, guild_id, iracing_id)
 
         await ctx.send(print_recent_races(races_stats_list, iracing_id))
 
@@ -53,11 +49,7 @@ class Iracing(commands.Cog):
                                'ID>`')
                 return
 
-        response = irw.yearly_stats(iracing_id)
-
-        yearly_stats = map(lambda x: YearlyStats(x), response)
-
-        update_user(user_id, guild_id, None, copy.deepcopy(yearly_stats), None)
+        yearly_stats = update_yearly_stats(user_id, guild_id, iracing_id)
 
         await ctx.send(print_yearly_stats(yearly_stats, iracing_id))
 
@@ -73,9 +65,7 @@ class Iracing(commands.Cog):
                                'ID>`')
                 return
 
-        response = irw.career_stats(iracing_id)
-
-        career_stats = map(lambda x: CareerStats(x), response)
+        career_stats = update_career_stats(user_id, guild_id, iracing_id)
 
         update_user(user_id, guild_id, copy.deepcopy(career_stats), None, None)
 
