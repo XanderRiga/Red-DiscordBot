@@ -8,6 +8,7 @@ from .ir_webstats_rc.responses.yearly_stats import YearlyStats
 from .ir_webstats_rc.responses.career_stats import CareerStats
 from .storage import *
 import copy
+import discord
 
 dotenv.load_dotenv()
 
@@ -92,11 +93,12 @@ class Iracing(commands.Cog):
 
         await ctx.send('iRacing ID successfully saved')
 
-    # @commands.command()
-    # async def leaderboard(self, ctx):
-    #     guild_dict = get_dict_of_data(ctx.guild.id)
-    #     for user_id, user_data in guild_dict.items():
-    #         pass
+    @commands.command()
+    async def leaderboard(self, ctx):
+        guild_dict = get_dict_of_data(ctx.guild.id)
+
+        sorted_list = sorted(guild_dict.items(), key=lambda x: x[1]['road_irating'], reverse=True)
+        await ctx.send(print_leaderboard(sorted_list, ctx.guild))
 
     @commands.command()
     async def update(self, ctx):
@@ -107,6 +109,39 @@ class Iracing(commands.Cog):
                 update_user_data(user_id, guild_id, (guild_dict[user_id]['iracing_id']))
 
         await ctx.send('Successfully updated user data')
+
+
+def print_leaderboard(user_data_list, guild):
+    string = 'iRacing Leaderboard' + '\n\n'
+    string += 'Racer'.ljust(12) + \
+              'Road iRating'.ljust(16) + \
+              'Wins'.ljust(8) + \
+              'Top 5s'.ljust(8) + \
+              'Avg Start'.ljust(12) + \
+              'Avg Finish'.ljust(12) + \
+              'Avg Incidents'.ljust(15) + '\n'
+    string += '------------------------------------------------------------------------------------\n'
+
+    for item in user_data_list:
+        member = discord.utils.find(lambda m: m.id == int(item[0]), guild.members)
+
+        career_stats_list = list(map(lambda x: CareerStats(x), item[-1]['career_stats']))
+
+        road_career_stats = None
+        for career_stats in career_stats_list:
+            if career_stats.category == 'Road':
+                road_career_stats = career_stats
+
+        if road_career_stats:
+            string += member.name.ljust(12) + \
+                      str(item[-1]['road_irating']).ljust(16) + \
+                      str(road_career_stats.wins).ljust(8) + \
+                      str(road_career_stats.top5).ljust(8) + \
+                      str(road_career_stats.avgStart).ljust(12) + \
+                      str(road_career_stats.avgFinish).ljust(12) + \
+                      str(road_career_stats.avgIncPerRace).ljust(15) + '\n'
+
+    return add_backticks(string)
 
 
 def try_save_irating(user_id, guild_id):
@@ -175,8 +210,8 @@ def print_career_stats(career_stats, iracing_id):
                   str(career_stat.avgStart).ljust(12) + \
                   str(career_stat.avgFinish).ljust(12) + \
                   str(career_stat.avgIncPerRace).ljust(15) + \
-                  str(career_stat.top5Percentage).ljust(9) + \
-                  str(career_stat.winPercentage).ljust(8) + '\n'
+                  str(career_stat.top5Perc).ljust(9) + \
+                  str(career_stat.winPerc).ljust(8) + '\n'
 
     return add_backticks(string)
 
@@ -205,8 +240,8 @@ def print_yearly_stats(yearly_stats, iracing_id):
                   str(yearly_stat.avgStart).ljust(12) + \
                   str(yearly_stat.avgFinish).ljust(12) + \
                   str(yearly_stat.avgIncPerRace).ljust(15) + \
-                  str(yearly_stat.top5Percentage).ljust(9) + \
-                  str(yearly_stat.winPercentage).ljust(7) + '\n'
+                  str(yearly_stat.top5Perc).ljust(9) + \
+                  str(yearly_stat.winPerc).ljust(7) + '\n'
 
     return add_backticks(string)
 
@@ -227,7 +262,7 @@ def print_recent_races(recent_races, iracing_id):
         string += ('P' + str(recent_race.finishPos)).ljust(8) + \
                   ('P' + str(recent_race.startPos)).ljust(8) + \
                   str(recent_race.incidents).ljust(11) + \
-                  str(recent_race.strengthOfField).ljust(13) + \
+                  str(recent_race.sof).ljust(13) + \
                   recent_race.date.ljust(15) + \
                   get_series_name(recent_race.seriesID).ljust(30) + \
                   recent_race.trackName.ljust(30) + '\n'
