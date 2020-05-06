@@ -113,14 +113,15 @@ class Iracing(commands.Cog):
 
 def print_leaderboard(user_data_list, guild):
     string = 'iRacing Leaderboard' + '\n\n'
-    string += 'Racer'.ljust(12) + \
+    string += 'Racer'.ljust(16) + \
+              'Starts'.ljust(8) + \
               'Road iRating'.ljust(16) + \
               'Wins'.ljust(8) + \
               'Top 5s'.ljust(8) + \
               'Avg Start'.ljust(12) + \
               'Avg Finish'.ljust(12) + \
               'Avg Incidents'.ljust(15) + '\n'
-    string += '------------------------------------------------------------------------------------\n'
+    string += '---------------------------------------------------------------------------------------------\n'
 
     for item in user_data_list:
         member = discord.utils.find(lambda m: m.id == int(item[0]), guild.members)
@@ -133,7 +134,8 @@ def print_leaderboard(user_data_list, guild):
                 road_career_stats = career_stats
 
         if road_career_stats:
-            string += member.name.ljust(12) + \
+            string += member.name.ljust(16) + \
+                      str(road_career_stats.starts).ljust(8) + \
                       str(item[-1]['road_irating']).ljust(16) + \
                       str(road_career_stats.wins).ljust(8) + \
                       str(road_career_stats.top5).ljust(8) + \
