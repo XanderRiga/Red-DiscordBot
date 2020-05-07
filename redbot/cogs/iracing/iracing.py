@@ -122,7 +122,7 @@ def print_leaderboard(user_data_list, guild, category):
               'Wins'.ljust(8) + \
               'Top 5s'.ljust(8) + \
               'Win %'.ljust(9) + \
-              'Top 5 %'.ljust(7) + \
+              'Top 5 %'.ljust(9) + \
               'Avg Start'.ljust(12) + \
               'Avg Finish'.ljust(12) + \
               'Avg Incidents'.ljust(15) + '\n'
@@ -165,7 +165,7 @@ def print_leaderboard(user_data_list, guild, category):
                       str(career_stats.wins).ljust(8) + \
                       str(career_stats.top5).ljust(8) + \
                       str(career_stats.winPerc).ljust(9) + \
-                      str(career_stats.top5Perc).ljust(7) + \
+                      str(career_stats.top5Perc).ljust(9) + \
                       str(career_stats.avgStart).ljust(12) + \
                       str(career_stats.avgFinish).ljust(12) + \
                       str(career_stats.avgIncPerRace).ljust(15) + '\n'
