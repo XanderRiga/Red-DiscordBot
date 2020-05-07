@@ -78,9 +78,6 @@ class Iracing(commands.Cog):
         guild_id = str(ctx.guild.id)
 
         save_iracing_id(user_id, guild_id, iracing_id)
-
-        save_iratings(user_id, guild_id)
-
         await ctx.send('iRacing ID successfully saved')
 
     @commands.command()
@@ -92,13 +89,19 @@ class Iracing(commands.Cog):
             await ctx.send('Please try again with one of these categories: `road`, `oval`, `dirtroad`, `dirtoval`')
             return
 
+        guild_dict = get_dict_of_data(ctx.guild.id)
         if category == 'road':
-            guild_dict = get_dict_of_data(ctx.guild.id)
-
             sorted_list = sorted(guild_dict.items(), key=lambda x: x[1]['road_irating'], reverse=True)
-            await ctx.send(print_leaderboard(sorted_list, ctx.guild))
-        else:
-            await ctx.send('These are not quite finished yet, try again soon!')
+            await ctx.send(print_leaderboard(sorted_list, ctx.guild, category))
+        elif category == 'oval':
+            sorted_list = sorted(guild_dict.items(), key=lambda x: x[1]['oval_irating'], reverse=True)
+            await ctx.send(print_leaderboard(sorted_list, ctx.guild, category))
+        elif category == 'dirtroad':
+            sorted_list = sorted(guild_dict.items(), key=lambda x: x[1]['dirt_road_irating'], reverse=True)
+            await ctx.send(print_leaderboard(sorted_list, ctx.guild, category))
+        elif category == 'dirtoval':
+            sorted_list = sorted(guild_dict.items(), key=lambda x: x[1]['dirt_oval_irating'], reverse=True)
+            await ctx.send(print_leaderboard(sorted_list, ctx.guild, category))
 
     @commands.command()
     async def update(self, ctx):
@@ -111,11 +114,11 @@ class Iracing(commands.Cog):
         await ctx.send('Successfully updated user data')
 
 
-def print_leaderboard(user_data_list, guild):
-    string = 'iRacing Leaderboard' + '\n\n'
+def print_leaderboard(user_data_list, guild, category):
+    string = 'iRacing ' + lowercase_to_readable_categories(category) + ' Leaderboard' + '\n\n'
     string += 'Racer'.ljust(16) + \
               'Starts'.ljust(8) + \
-              'Road iRating'.ljust(16) + \
+              'iRating'.ljust(16) + \
               'Wins'.ljust(8) + \
               'Top 5s'.ljust(8) + \
               'Win %'.ljust(9) + \
@@ -128,27 +131,57 @@ def print_leaderboard(user_data_list, guild):
 
     for item in user_data_list:
         member = discord.utils.find(lambda m: m.id == int(item[0]), guild.members)
-
         career_stats_list = list(map(lambda x: CareerStats(x), item[-1]['career_stats']))
 
-        road_career_stats = None
-        for career_stats in career_stats_list:
-            if career_stats.category == 'Road':
-                road_career_stats = career_stats
+        irating = 0
+        if category == 'road':
+            irating = item[-1]['road_irating']
+        elif category == 'oval':
+            irating = item[-1]['oval_irating']
+        elif category == 'dirtroad':
+            irating = item[-1]['dirt_road_irating']
+        elif category == 'dirtoval':
+            irating = item[-1]['dirt_oval_irating']
 
-        if road_career_stats:
+        career_stats = None
+        for career_stat in career_stats_list:
+            if category == 'road':
+                if career_stat.category == 'Road':
+                    career_stats = career_stat
+            elif category == 'oval':
+                if career_stat.category == 'Oval':
+                    career_stats = career_stat
+            elif category == 'dirtroad':
+                if career_stat.category == 'Dirt+Road':
+                    career_stats = career_stat
+            elif category == 'dirtoval':
+                if career_stat.category == 'Dirt+Oval':
+                    career_stats = career_stat
+
+        if career_stats:
             string += member.name.ljust(16) + \
-                      str(road_career_stats.starts).ljust(8) + \
-                      str(item[-1]['road_irating']).ljust(16) + \
-                      str(road_career_stats.wins).ljust(8) + \
-                      str(road_career_stats.top5).ljust(8) + \
-                      str(road_career_stats.winPerc).ljust(9) + \
-                      str(road_career_stats.top5Perc).ljust(7) + \
-                      str(road_career_stats.avgStart).ljust(12) + \
-                      str(road_career_stats.avgFinish).ljust(12) + \
-                      str(road_career_stats.avgIncPerRace).ljust(15) + '\n'
+                      str(career_stats.starts).ljust(8) + \
+                      str(irating).ljust(16) + \
+                      str(career_stats.wins).ljust(8) + \
+                      str(career_stats.top5).ljust(8) + \
+                      str(career_stats.winPerc).ljust(9) + \
+                      str(career_stats.top5Perc).ljust(7) + \
+                      str(career_stats.avgStart).ljust(12) + \
+                      str(career_stats.avgFinish).ljust(12) + \
+                      str(career_stats.avgIncPerRace).ljust(15) + '\n'
 
     return add_backticks(string)
+
+
+def lowercase_to_readable_categories(category):
+    if category == 'road':
+        return 'Road'
+    elif category == 'oval':
+        return 'Oval'
+    elif category == 'dirtroad':
+        return 'Dirt Road'
+    elif category == 'dirtoval':
+        return 'Dirt Oval'
 
 
 def save_iratings(user_id, guild_id):
