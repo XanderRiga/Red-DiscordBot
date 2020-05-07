@@ -92,10 +92,13 @@ class Iracing(commands.Cog):
             await ctx.send('Please try again with one of these categories: `road`, `oval`, `dirtroad`, `dirtoval`')
             return
 
-        guild_dict = get_dict_of_data(ctx.guild.id)
+        if category == 'road':
+            guild_dict = get_dict_of_data(ctx.guild.id)
 
-        sorted_list = sorted(guild_dict.items(), key=lambda x: x[1]['road_irating'], reverse=True)
-        await ctx.send(print_leaderboard(sorted_list, ctx.guild))
+            sorted_list = sorted(guild_dict.items(), key=lambda x: x[1]['road_irating'], reverse=True)
+            await ctx.send(print_leaderboard(sorted_list, ctx.guild))
+        else:
+            await ctx.send('These are not quite finished yet, try again soon!')
 
     @commands.command()
     async def update(self, ctx):
