@@ -108,10 +108,13 @@ def print_leaderboard(user_data_list, guild):
               'Road iRating'.ljust(16) + \
               'Wins'.ljust(8) + \
               'Top 5s'.ljust(8) + \
+              'Win %'.ljust(9) + \
+              'Top 5 %'.ljust(7) + \
               'Avg Start'.ljust(12) + \
               'Avg Finish'.ljust(12) + \
               'Avg Incidents'.ljust(15) + '\n'
-    string += '---------------------------------------------------------------------------------------------\n'
+    string += '----------------------------------------------------------------------------------------------------' \
+              '-----------\n'
 
     for item in user_data_list:
         member = discord.utils.find(lambda m: m.id == int(item[0]), guild.members)
@@ -129,6 +132,8 @@ def print_leaderboard(user_data_list, guild):
                       str(item[-1]['road_irating']).ljust(16) + \
                       str(road_career_stats.wins).ljust(8) + \
                       str(road_career_stats.top5).ljust(8) + \
+                      str(road_career_stats.winPerc).ljust(9) + \
+                      str(road_career_stats.top5Perc).ljust(7) + \
                       str(road_career_stats.avgStart).ljust(12) + \
                       str(road_career_stats.avgFinish).ljust(12) + \
                       str(road_career_stats.avgIncPerRace).ljust(15) + '\n'
