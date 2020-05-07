@@ -2,7 +2,7 @@ from redbot.core import commands
 import os
 import sys
 import dotenv
-from .ir_webstats_rc.client import iRWebStats
+from .ir_webstats_rc.client import iRWebStats, IRATING_DIRT_OVAL_CHART, IRATING_ROAD_CHART, IRATING_OVAL_CHART, IRATING_DIRT_ROAD_CHART
 from .ir_webstats_rc.responses.last_races_stats import LastRacesStats
 from .ir_webstats_rc.responses.yearly_stats import YearlyStats
 from .ir_webstats_rc.responses.career_stats import CareerStats
@@ -79,12 +79,19 @@ class Iracing(commands.Cog):
 
         save_iracing_id(user_id, guild_id, iracing_id)
 
-        try_save_irating(user_id, guild_id)
+        save_iratings(user_id, guild_id)
 
         await ctx.send('iRacing ID successfully saved')
 
     @commands.command()
-    async def leaderboard(self, ctx):
+    async def leaderboard(self, ctx, category='road'):
+        """Displays a leaderboard of the users who have used `!saveid`.
+        If the data is not up to date, try `!update` first.
+        The categories are `road`, `oval`, `dirtroad`, and `dirtoval`"""
+        if category not in ['road', 'oval', 'dirtroad', 'dirtoval']:
+            await ctx.send('Please try again with one of these categories: `road`, `oval`, `dirtroad`, `dirtoval`')
+            return
+
         guild_dict = get_dict_of_data(ctx.guild.id)
 
         sorted_list = sorted(guild_dict.items(), key=lambda x: x[1]['road_irating'], reverse=True)
@@ -141,20 +148,29 @@ def print_leaderboard(user_data_list, guild):
     return add_backticks(string)
 
 
-def try_save_irating(user_id, guild_id):
+def save_iratings(user_id, guild_id):
     iracing_id = get_user_iracing_id(user_id, guild_id)
-    irating = road_irating(iracing_id)
-    if not irating:
-        return
 
-    save_road_irating(user_id, guild_id, irating)
+    oval_irating = get_irating(iracing_id, IRATING_OVAL_CHART)
+    road_irating = get_irating(iracing_id, IRATING_ROAD_CHART)
+    dirt_oval_irating = get_irating(iracing_id, IRATING_DIRT_OVAL_CHART)
+    dirt_road_irating = get_irating(iracing_id, IRATING_DIRT_ROAD_CHART)
+
+    irating_dict = {
+        IRATING_OVAL_CHART: oval_irating,
+        IRATING_ROAD_CHART: road_irating,
+        IRATING_DIRT_OVAL_CHART: dirt_oval_irating,
+        IRATING_DIRT_ROAD_CHART: dirt_road_irating
+    }
+
+    save_irating(user_id, guild_id, irating_dict)
 
 
 def update_user_data(user_id, guild_id, iracing_id):
     update_last_races(user_id, guild_id, iracing_id)
     update_yearly_stats(user_id, guild_id, iracing_id)
     update_career_stats(user_id, guild_id, iracing_id)
-    try_save_irating(user_id, guild_id)
+    save_iratings(user_id, guild_id)
 
 
 def update_last_races(user_id, guild_id, iracing_id):
@@ -181,8 +197,8 @@ def update_career_stats(user_id, guild_id, iracing_id):
         return career_stats_list
 
 
-def road_irating(user_id):
-    chart = irw.iratingchart(user_id)
+def get_irating(user_id, category):
+    chart = irw.iratingchart(user_id, category)
     if not isinstance(chart, list) or not isinstance(chart[-1], list):
         return None
     return str(chart[-1][-1])

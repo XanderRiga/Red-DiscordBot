@@ -1,14 +1,24 @@
 import json
 import os
+from .ir_webstats_rc.client import IRATING_DIRT_OVAL_CHART, IRATING_ROAD_CHART, IRATING_OVAL_CHART, IRATING_DIRT_ROAD_CHART
 
 folder = './data/'
 
 
-def save_road_irating(user_id, guild_id, irating):
+def save_irating(user_id, guild_id, irating_dict):
     ensure_file_exists(guild_id)
-
     user_data = get_user_data(user_id, guild_id) or {}
-    user_data['road_irating'] = irating
+
+    for category in irating_dict:
+        irating = irating_dict[category]
+        if category == IRATING_OVAL_CHART:
+            user_data['oval_irating'] = irating
+        if category == IRATING_ROAD_CHART:
+            user_data['road_irating'] = irating
+        if category == IRATING_DIRT_OVAL_CHART:
+            user_data['dirt_oval_irating'] = irating
+        if category == IRATING_DIRT_ROAD_CHART:
+            user_data['dirt_road_irating'] = irating
 
     set_user_data(user_id, guild_id, user_data)
 
