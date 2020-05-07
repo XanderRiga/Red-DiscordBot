@@ -261,7 +261,7 @@ def print_recent_races(recent_races, iracing_id):
               'Incidents'.ljust(11) + \
               'Avg iRating'.ljust(13) + \
               'Race Date'.ljust(15) + \
-              'Series'.ljust(30) + \
+              'Series'.ljust(38) + \
               'Track Name'.ljust(30) + '\n'
     string += '------------------------------------------------------------------------------------' \
               '-----------------------\n'
@@ -272,7 +272,7 @@ def print_recent_races(recent_races, iracing_id):
                   str(recent_race.incidents).ljust(11) + \
                   str(recent_race.sof).ljust(13) + \
                   recent_race.date.ljust(15) + \
-                  get_series_name(recent_race.seriesID).ljust(30) + \
+                  get_series_name(recent_race.seriesID).ljust(38) + \
                   recent_race.trackName.ljust(30) + '\n'
 
     return add_backticks(string)
