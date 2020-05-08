@@ -106,6 +106,7 @@ class Iracing(commands.Cog):
 
     @commands.command()
     async def update(self, ctx):
+        await ctx.send('Updating all user data, this might take a few minutes')
         guild_id = ctx.guild.id
         guild_dict = get_dict_of_data(guild_id)
         for user_id in guild_dict:
