@@ -211,25 +211,22 @@ def update_user_data(user_id, guild_id, iracing_id):
 
 
 def update_last_races(user_id, guild_id, iracing_id):
-    races_stats_dict = irw.lastrace_stats(iracing_id)
-    if races_stats_dict:
-        races_stats_list = map(lambda x: LastRacesStats(x), races_stats_dict)
+    races_stats_list = irw.lastrace_stats(iracing_id)
+    if races_stats_list:
         update_user(user_id, guild_id, None, None, copy.deepcopy(races_stats_list))
         return races_stats_list
 
 
 def update_yearly_stats(user_id, guild_id, iracing_id):
-    yearly_stats_dict = irw.yearly_stats(iracing_id)
-    if yearly_stats_dict:
-        yearly_stats_list = map(lambda x: YearlyStats(x), yearly_stats_dict)
+    yearly_stats_list = irw.yearly_stats(iracing_id)
+    if yearly_stats_list:
         update_user(user_id, guild_id, None, copy.deepcopy(yearly_stats_list), None)
         return yearly_stats_list
 
 
 def update_career_stats(user_id, guild_id, iracing_id):
-    career_stats_dict = irw.career_stats(iracing_id)
-    if career_stats_dict:
-        career_stats_list = map(lambda x: CareerStats(x), career_stats_dict)
+    career_stats_list = irw.career_stats(iracing_id)
+    if career_stats_list:
         update_user(user_id, guild_id, copy.deepcopy(career_stats_list), None, None)
         return career_stats_list
 
