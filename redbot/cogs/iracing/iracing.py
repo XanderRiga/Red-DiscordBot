@@ -30,13 +30,16 @@ class Iracing(commands.Cog):
         if not iracing_id:
             iracing_id = get_user_iracing_id(user_id, guild_id)
             if not iracing_id:
-                await ctx.send('Please send an iRacing ID after the command or link your own with `!saveid <iRacing '
+                await ctx.send('Please send an iRacing ID with the command or link your own with `!saveid <iRacing '
                                'ID>`')
                 return
 
         races_stats_list = update_last_races(user_id, guild_id, iracing_id)
 
-        await ctx.send(print_recent_races(races_stats_list, iracing_id))
+        if races_stats_list:
+            await ctx.send(print_recent_races(races_stats_list, iracing_id))
+        else:
+            await ctx.send('No recent races found for user: ' + str(iracing_id))
 
     @commands.command()
     async def yearlystats(self, ctx, *, iracing_id=None):
@@ -52,7 +55,10 @@ class Iracing(commands.Cog):
 
         yearly_stats = update_yearly_stats(user_id, guild_id, iracing_id)
 
-        await ctx.send(print_yearly_stats(yearly_stats, iracing_id))
+        if yearly_stats:
+            await ctx.send(print_yearly_stats(yearly_stats, iracing_id))
+        else:
+            await ctx.send('No yearly stats found for user: ' + str(iracing_id))
 
     @commands.command()
     async def careerstats(self, ctx, *, iracing_id=None):
@@ -68,9 +74,10 @@ class Iracing(commands.Cog):
 
         career_stats = update_career_stats(user_id, guild_id, iracing_id)
 
-        update_user(user_id, guild_id, copy.deepcopy(career_stats), None, None)
-
-        await ctx.send(print_career_stats(career_stats, iracing_id))
+        if career_stats:
+            await ctx.send(print_career_stats(career_stats, iracing_id))
+        else:
+            await ctx.send('No career stats found for user: ' + str(iracing_id))
 
     @commands.command()
     async def saveid(self, ctx, *, iracing_id):
@@ -234,8 +241,8 @@ def update_career_stats(user_id, guild_id, iracing_id):
 
 def get_irating(user_id, category):
     chart = irw.iratingchart(user_id, category)
-    if not isinstance(chart, list) or not isinstance(chart[-1], list):
-        return None
+    if not chart or not isinstance(chart, list) or not isinstance(chart[-1], list):
+        return 0
     return str(chart[-1][-1])
 
 
