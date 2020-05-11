@@ -102,16 +102,16 @@ class Iracing(commands.Cog):
 
         guild_dict = get_dict_of_data(ctx.guild.id)
         if category == 'road':
-            sorted_list = sorted(guild_dict.items(), key=lambda x: x[1]['road_irating'], reverse=True)
+            sorted_list = sorted(guild_dict.items(), key=lambda x: int(x[1]['road_irating']), reverse=True)
             await ctx.send(print_leaderboard(sorted_list, ctx.guild, category))
         elif category == 'oval':
-            sorted_list = sorted(guild_dict.items(), key=lambda x: x[1]['oval_irating'], reverse=True)
+            sorted_list = sorted(guild_dict.items(), key=lambda x: int(x[1]['oval_irating']), reverse=True)
             await ctx.send(print_leaderboard(sorted_list, ctx.guild, category))
         elif category == 'dirtroad':
-            sorted_list = sorted(guild_dict.items(), key=lambda x: x[1]['dirt_road_irating'], reverse=True)
+            sorted_list = sorted(guild_dict.items(), key=lambda x: int(x[1]['dirt_road_irating']), reverse=True)
             await ctx.send(print_leaderboard(sorted_list, ctx.guild, category))
         elif category == 'dirtoval':
-            sorted_list = sorted(guild_dict.items(), key=lambda x: x[1]['dirt_oval_irating'], reverse=True)
+            sorted_list = sorted(guild_dict.items(), key=lambda x: int(x[1]['dirt_oval_irating']), reverse=True)
             await ctx.send(print_leaderboard(sorted_list, ctx.guild, category))
 
     @commands.command()
