@@ -37,8 +37,11 @@ class Iracing(commands.Cog):
         races_stats_list = update_last_races(user_id, guild_id, iracing_id)
 
         if races_stats_list:
+            print('sending recent races for: ' + str(iracing_id))
             await ctx.send(print_recent_races(races_stats_list, iracing_id))
         else:
+            print('races stats list not found: ' + str(iracing_id))
+            print(races_stats_list)
             await ctx.send('No recent races found for user: ' + str(iracing_id))
 
     @commands.command()
@@ -221,6 +224,7 @@ def update_user_data(user_id, guild_id, iracing_id):
 def update_last_races(user_id, guild_id, iracing_id):
     races_stats_list = irw.lastrace_stats(iracing_id)
     if races_stats_list:
+        print('found a races stats list for user: ' + str(iracing_id))
         update_user(user_id, guild_id, None, None, copy.deepcopy(races_stats_list))
         return races_stats_list
 
