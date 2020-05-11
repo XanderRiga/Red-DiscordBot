@@ -211,6 +211,9 @@ def save_iratings(user_id, guild_id):
         IRATING_DIRT_ROAD_CHART: dirt_road_irating
     }
 
+    print('iRatings found for: ' + str(iracing_id))
+    print(irating_dict)
+
     save_irating(user_id, guild_id, irating_dict)
 
 
