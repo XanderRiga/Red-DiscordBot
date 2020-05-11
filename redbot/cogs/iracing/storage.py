@@ -5,20 +5,14 @@ from .ir_webstats_rc.client import IRATING_DIRT_OVAL_CHART, IRATING_ROAD_CHART, 
 folder = './data/'
 
 
-def save_irating(user_id, guild_id, irating_dict):
+def save_irating(user_id, guild_id, iratings):
     ensure_file_exists(guild_id)
     user_data = get_user_data(user_id, guild_id) or {}
 
-    for category in irating_dict:
-        irating = irating_dict[category]
-        if category == IRATING_OVAL_CHART:
-            user_data['oval_irating'] = irating
-        if category == IRATING_ROAD_CHART:
-            user_data['road_irating'] = irating
-        if category == IRATING_DIRT_OVAL_CHART:
-            user_data['dirt_oval_irating'] = irating
-        if category == IRATING_DIRT_ROAD_CHART:
-            user_data['dirt_road_irating'] = irating
+    user_data['oval_irating'] = iratings.oval
+    user_data['road_irating'] = iratings.road
+    user_data['dirt_road_irating'] = iratings.dirt
+    user_data['dirt_oval_irating'] = iratings.dirtoval
 
     set_user_data(user_id, guild_id, user_data)
 

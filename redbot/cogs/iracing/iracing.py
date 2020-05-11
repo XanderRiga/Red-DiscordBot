@@ -7,6 +7,7 @@ from .ir_webstats_rc.constants import IRATING_DIRT_OVAL_CHART, IRATING_ROAD_CHAR
 from .ir_webstats_rc.responses.last_races_stats import LastRacesStats
 from .ir_webstats_rc.responses.yearly_stats import YearlyStats
 from .ir_webstats_rc.responses.career_stats import CareerStats
+from .ir_webstats_rc.responses.iratings import Iratings
 from .storage import *
 import copy
 import discord
@@ -204,17 +205,12 @@ def save_iratings(user_id, guild_id):
     dirt_oval_irating = get_irating(iracing_id, IRATING_DIRT_OVAL_CHART)
     dirt_road_irating = get_irating(iracing_id, IRATING_DIRT_ROAD_CHART)
 
-    irating_dict = {
-        IRATING_OVAL_CHART: oval_irating,
-        IRATING_ROAD_CHART: road_irating,
-        IRATING_DIRT_OVAL_CHART: dirt_oval_irating,
-        IRATING_DIRT_ROAD_CHART: dirt_road_irating
-    }
+    iratings = Iratings(oval_irating, road_irating, dirt_road_irating, dirt_oval_irating)
 
     print('iRatings found for: ' + str(iracing_id))
-    print(irating_dict)
+    print(json.dumps(iratings.__dict__))
 
-    save_irating(user_id, guild_id, irating_dict)
+    save_irating(user_id, guild_id, iratings)
 
 
 def update_user_data(user_id, guild_id, iracing_id):
