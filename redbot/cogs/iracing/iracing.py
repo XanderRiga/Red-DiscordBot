@@ -35,7 +35,7 @@ class Iracing(commands.Cog):
                                'ID>`')
                 return
 
-        races_stats_list = update_last_races(user_id, guild_id, iracing_id)
+        races_stats_list = await update_last_races(user_id, guild_id, iracing_id)
 
         if races_stats_list:
             print('sending recent races for: ' + str(iracing_id))
@@ -57,7 +57,7 @@ class Iracing(commands.Cog):
                                'ID>`')
                 return
 
-        yearly_stats = update_yearly_stats(user_id, guild_id, iracing_id)
+        yearly_stats = await update_yearly_stats(user_id, guild_id, iracing_id)
 
         if yearly_stats:
             await ctx.send(print_yearly_stats(yearly_stats, iracing_id))
@@ -76,7 +76,7 @@ class Iracing(commands.Cog):
                                'ID>`')
                 return
 
-        career_stats = update_career_stats(user_id, guild_id, iracing_id)
+        career_stats = await update_career_stats(user_id, guild_id, iracing_id)
 
         if career_stats:
             await ctx.send(print_career_stats(career_stats, iracing_id))
@@ -214,29 +214,29 @@ async def save_iratings(user_id, guild_id):
 
 
 async def update_user_data(user_id, guild_id, iracing_id):
-    update_last_races(user_id, guild_id, iracing_id)
-    update_yearly_stats(user_id, guild_id, iracing_id)
-    update_career_stats(user_id, guild_id, iracing_id)
+    await update_last_races(user_id, guild_id, iracing_id)
+    await update_yearly_stats(user_id, guild_id, iracing_id)
+    await update_career_stats(user_id, guild_id, iracing_id)
     await save_iratings(user_id, guild_id)
 
 
-def update_last_races(user_id, guild_id, iracing_id):
-    races_stats_list = irw.lastrace_stats(iracing_id)
+async def update_last_races(user_id, guild_id, iracing_id):
+    races_stats_list = await irw.lastrace_stats(iracing_id)
     if races_stats_list:
         print('found a races stats list for user: ' + str(iracing_id))
         update_user(user_id, guild_id, None, None, copy.deepcopy(races_stats_list))
         return races_stats_list
 
 
-def update_yearly_stats(user_id, guild_id, iracing_id):
-    yearly_stats_list = irw.yearly_stats(iracing_id)
+async def update_yearly_stats(user_id, guild_id, iracing_id):
+    yearly_stats_list = await irw.yearly_stats(iracing_id)
     if yearly_stats_list:
         update_user(user_id, guild_id, None, copy.deepcopy(yearly_stats_list), None)
         return yearly_stats_list
 
 
-def update_career_stats(user_id, guild_id, iracing_id):
-    career_stats_list = irw.career_stats(iracing_id)
+async def update_career_stats(user_id, guild_id, iracing_id):
+    career_stats_list = await irw.career_stats(iracing_id)
     if career_stats_list:
         update_user(user_id, guild_id, copy.deepcopy(career_stats_list), None, None)
         return career_stats_list
