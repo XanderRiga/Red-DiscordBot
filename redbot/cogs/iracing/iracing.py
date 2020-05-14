@@ -62,6 +62,93 @@ def print_yearly_stats(yearly_stats, iracing_id):
     return add_backticks(string)
 
 
+def print_leaderboard(user_data_list, guild, category):
+    string = 'iRacing ' + lowercase_to_readable_categories(category) + ' Leaderboard' + '\n\n'
+    string += 'Racer'.ljust(16) + \
+              'Starts'.ljust(8) + \
+              'iRating'.ljust(16) + \
+              'Wins'.ljust(8) + \
+              'Top 5s'.ljust(8) + \
+              'Win %'.ljust(9) + \
+              'Top 5 %'.ljust(9) + \
+              'Avg Start'.ljust(12) + \
+              'Avg Finish'.ljust(12) + \
+              'Avg Incidents'.ljust(15) + '\n'
+    string += '----------------------------------------------------------------------------------------------------' \
+              '-----------\n'
+
+    for item in user_data_list:
+        member = discord.utils.find(lambda m: m.id == int(item[0]), guild.members)
+        career_stats_list = list(map(lambda x: CareerStats(x), item[-1]['career_stats']))
+
+        irating = 0
+        if category == 'road':
+            irating = item[-1]['road_irating']
+        elif category == 'oval':
+            irating = item[-1]['oval_irating']
+        elif category == 'dirtroad':
+            irating = item[-1]['dirt_road_irating']
+        elif category == 'dirtoval':
+            irating = item[-1]['dirt_oval_irating']
+
+        career_stats = None
+        for career_stat in career_stats_list:
+            if category == 'road':
+                if career_stat.category == 'Road':
+                    career_stats = career_stat
+            elif category == 'oval':
+                if career_stat.category == 'Oval':
+                    career_stats = career_stat
+            elif category == 'dirtroad':
+                if career_stat.category == 'Dirt+Road':
+                    career_stats = career_stat
+            elif category == 'dirtoval':
+                if career_stat.category == 'Dirt+Oval':
+                    career_stats = career_stat
+
+        if career_stats:
+            string += member.name.ljust(16) + \
+                      str(career_stats.starts).ljust(8) + \
+                      str(irating).ljust(16) + \
+                      str(career_stats.wins).ljust(8) + \
+                      str(career_stats.top5).ljust(8) + \
+                      str(career_stats.winPerc).ljust(9) + \
+                      str(career_stats.top5Perc).ljust(9) + \
+                      str(career_stats.avgStart).ljust(12) + \
+                      str(career_stats.avgFinish).ljust(12) + \
+                      str(career_stats.avgIncPerRace).ljust(15) + '\n'
+
+    return add_backticks(string)
+
+
+def print_career_stats(career_stats, iracing_id):
+    string = 'Career Data for user: ' + str(iracing_id) + '\n\n'
+    string += 'Category'.ljust(10) + \
+              'Starts'.ljust(8) + \
+              'Top 5s'.ljust(8) + \
+              'Wins'.ljust(8) + \
+              'Avg Start'.ljust(12) + \
+              'Avg Finish'.ljust(12) + \
+              'Avg Incidents'.ljust(15) + \
+              'Top 5 %'.ljust(9) + \
+              'Win %'.ljust(8) + '\n'
+    string += '--------------------------------------------------------------------' \
+              '---------------------\n'
+
+    for career_stat in career_stats:
+        string += career_stat.category.ljust(10) + \
+                  str(career_stat.starts).ljust(8) + \
+                  str(career_stat.top5).ljust(8) + \
+                  str(career_stat.wins).ljust(8) + \
+                  str(career_stat.avgStart).ljust(12) + \
+                  str(career_stat.avgFinish).ljust(12) + \
+                  str(career_stat.avgIncPerRace).ljust(15) + \
+                  str(career_stat.top5Perc).ljust(9) + \
+                  str(career_stat.winPerc).ljust(8) + '\n'
+
+    return add_backticks(string)
+
+
 class Iracing(commands.Cog):
     """A cog that can give iRacing data about users"""
     def __init__(self):
@@ -131,7 +218,7 @@ class Iracing(commands.Cog):
         career_stats = await self.update_career_stats(user_id, guild_id, iracing_id)
 
         if career_stats:
-            await ctx.send(self.print_career_stats(career_stats, iracing_id))
+            await ctx.send(print_career_stats(career_stats, iracing_id))
         else:
             await ctx.send('No career stats found for user: ' + str(iracing_id))
 
@@ -156,16 +243,16 @@ class Iracing(commands.Cog):
         guild_dict = get_dict_of_data(ctx.guild.id)
         if category == 'road':
             sorted_list = sorted(guild_dict.items(), key=lambda x: int(x[1]['road_irating']), reverse=True)
-            await ctx.send(self.print_leaderboard(sorted_list, ctx.guild, category))
+            await ctx.send(print_leaderboard(sorted_list, ctx.guild, category))
         elif category == 'oval':
             sorted_list = sorted(guild_dict.items(), key=lambda x: int(x[1]['oval_irating']), reverse=True)
-            await ctx.send(self.print_leaderboard(sorted_list, ctx.guild, category))
+            await ctx.send(print_leaderboard(sorted_list, ctx.guild, category))
         elif category == 'dirtroad':
             sorted_list = sorted(guild_dict.items(), key=lambda x: int(x[1]['dirt_road_irating']), reverse=True)
-            await ctx.send(self.print_leaderboard(sorted_list, ctx.guild, category))
+            await ctx.send(print_leaderboard(sorted_list, ctx.guild, category))
         elif category == 'dirtoval':
             sorted_list = sorted(guild_dict.items(), key=lambda x: int(x[1]['dirt_oval_irating']), reverse=True)
-            await ctx.send(self.print_leaderboard(sorted_list, ctx.guild, category))
+            await ctx.send(print_leaderboard(sorted_list, ctx.guild, category))
 
     @commands.command()
     async def update(self, ctx):
@@ -177,64 +264,6 @@ class Iracing(commands.Cog):
                 await self.update_user_data(user_id, guild_id, (guild_dict[user_id]['iracing_id']))
 
         await ctx.send('Successfully updated user data')
-
-    def print_leaderboard(self, user_data_list, guild, category):
-        string = 'iRacing ' + lowercase_to_readable_categories(category) + ' Leaderboard' + '\n\n'
-        string += 'Racer'.ljust(16) + \
-                  'Starts'.ljust(8) + \
-                  'iRating'.ljust(16) + \
-                  'Wins'.ljust(8) + \
-                  'Top 5s'.ljust(8) + \
-                  'Win %'.ljust(9) + \
-                  'Top 5 %'.ljust(9) + \
-                  'Avg Start'.ljust(12) + \
-                  'Avg Finish'.ljust(12) + \
-                  'Avg Incidents'.ljust(15) + '\n'
-        string += '----------------------------------------------------------------------------------------------------' \
-                  '-----------\n'
-
-        for item in user_data_list:
-            member = discord.utils.find(lambda m: m.id == int(item[0]), guild.members)
-            career_stats_list = list(map(lambda x: CareerStats(x), item[-1]['career_stats']))
-
-            irating = 0
-            if category == 'road':
-                irating = item[-1]['road_irating']
-            elif category == 'oval':
-                irating = item[-1]['oval_irating']
-            elif category == 'dirtroad':
-                irating = item[-1]['dirt_road_irating']
-            elif category == 'dirtoval':
-                irating = item[-1]['dirt_oval_irating']
-
-            career_stats = None
-            for career_stat in career_stats_list:
-                if category == 'road':
-                    if career_stat.category == 'Road':
-                        career_stats = career_stat
-                elif category == 'oval':
-                    if career_stat.category == 'Oval':
-                        career_stats = career_stat
-                elif category == 'dirtroad':
-                    if career_stat.category == 'Dirt+Road':
-                        career_stats = career_stat
-                elif category == 'dirtoval':
-                    if career_stat.category == 'Dirt+Oval':
-                        career_stats = career_stat
-
-            if career_stats:
-                string += member.name.ljust(16) + \
-                          str(career_stats.starts).ljust(8) + \
-                          str(irating).ljust(16) + \
-                          str(career_stats.wins).ljust(8) + \
-                          str(career_stats.top5).ljust(8) + \
-                          str(career_stats.winPerc).ljust(9) + \
-                          str(career_stats.top5Perc).ljust(9) + \
-                          str(career_stats.avgStart).ljust(12) + \
-                          str(career_stats.avgFinish).ljust(12) + \
-                          str(career_stats.avgIncPerRace).ljust(15) + '\n'
-
-        return add_backticks(string)
 
     async def save_iratings(self, user_id, guild_id):
         iracing_id = get_user_iracing_id(user_id, guild_id)
@@ -288,33 +317,6 @@ class Iracing(commands.Cog):
                 return series.name
 
         return ""
-
-    def print_career_stats(self, career_stats, iracing_id):
-        string = 'Career Data for user: ' + str(iracing_id) + '\n\n'
-        string += 'Category'.ljust(10) + \
-                  'Starts'.ljust(8) + \
-                  'Top 5s'.ljust(8) + \
-                  'Wins'.ljust(8) + \
-                  'Avg Start'.ljust(12) + \
-                  'Avg Finish'.ljust(12) + \
-                  'Avg Incidents'.ljust(15) + \
-                  'Top 5 %'.ljust(9) + \
-                  'Win %'.ljust(8) + '\n'
-        string += '--------------------------------------------------------------------' \
-                  '---------------------\n'
-
-        for career_stat in career_stats:
-            string += career_stat.category.ljust(10) + \
-                      str(career_stat.starts).ljust(8) + \
-                      str(career_stat.top5).ljust(8) + \
-                      str(career_stat.wins).ljust(8) + \
-                      str(career_stat.avgStart).ljust(12) + \
-                      str(career_stat.avgFinish).ljust(12) + \
-                      str(career_stat.avgIncPerRace).ljust(15) + \
-                      str(career_stat.top5Perc).ljust(9) + \
-                      str(career_stat.winPerc).ljust(8) + '\n'
-
-        return add_backticks(string)
 
     def print_recent_races(self, recent_races, iracing_id):
         string = 'Recent Races Data for user: ' + str(iracing_id) + '\n\n'
