@@ -122,7 +122,7 @@ class Iracing(commands.Cog):
         guild_dict = get_dict_of_data(guild_id)
         for user_id in guild_dict:
             if 'iracing_id' in guild_dict[user_id]:
-                update_user_data(user_id, guild_id, (guild_dict[user_id]['iracing_id']))
+                await update_user_data(user_id, guild_id, (guild_dict[user_id]['iracing_id']))
 
         await ctx.send('Successfully updated user data')
 
@@ -197,13 +197,13 @@ def lowercase_to_readable_categories(category):
         return 'Dirt Oval'
 
 
-def save_iratings(user_id, guild_id):
+async def save_iratings(user_id, guild_id):
     iracing_id = get_user_iracing_id(user_id, guild_id)
 
-    oval_irating = get_irating(iracing_id, IRATING_OVAL_CHART)
-    road_irating = get_irating(iracing_id, IRATING_ROAD_CHART)
-    dirt_oval_irating = get_irating(iracing_id, IRATING_DIRT_OVAL_CHART)
-    dirt_road_irating = get_irating(iracing_id, IRATING_DIRT_ROAD_CHART)
+    oval_irating = await get_irating(iracing_id, IRATING_OVAL_CHART)
+    road_irating = await get_irating(iracing_id, IRATING_ROAD_CHART)
+    dirt_oval_irating = await get_irating(iracing_id, IRATING_DIRT_OVAL_CHART)
+    dirt_road_irating = await get_irating(iracing_id, IRATING_DIRT_ROAD_CHART)
 
     iratings = Iratings(oval_irating, road_irating, dirt_road_irating, dirt_oval_irating)
 
@@ -213,11 +213,11 @@ def save_iratings(user_id, guild_id):
     save_irating(user_id, guild_id, iratings)
 
 
-def update_user_data(user_id, guild_id, iracing_id):
+async def update_user_data(user_id, guild_id, iracing_id):
     update_last_races(user_id, guild_id, iracing_id)
     update_yearly_stats(user_id, guild_id, iracing_id)
     update_career_stats(user_id, guild_id, iracing_id)
-    save_iratings(user_id, guild_id)
+    await save_iratings(user_id, guild_id)
 
 
 def update_last_races(user_id, guild_id, iracing_id):
@@ -242,8 +242,8 @@ def update_career_stats(user_id, guild_id, iracing_id):
         return career_stats_list
 
 
-def get_irating(user_id, category):
-    chart = irw.iratingchart(user_id, category)
+async def get_irating(user_id, category):
+    chart = await irw.iratingchart(user_id, category)
     if not chart or not isinstance(chart, list) or not isinstance(chart[-1], list):
         return 0
     return str(chart[-1][-1])
