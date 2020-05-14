@@ -66,12 +66,11 @@ class Iracing(commands.Cog):
     """A cog that can give iRacing data about users"""
     def __init__(self):
         super().__init__()
-        self.irw = None
+        self.irw = iRWebStats()
         self.all_series = []
 
     @commands.command()
     async def initialize(self, ctx):
-        self.irw = iRWebStats()
         await self.irw.login(os.getenv("IRACING_USERNAME"), os.getenv("IRACING_PASSWORD"))
         self.all_series = await self.irw.all_seasons()
         await ctx.send("iRacing module is loaded!")
