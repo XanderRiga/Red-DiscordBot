@@ -261,7 +261,7 @@ class Iracing(commands.Cog):
         guild_dict = get_dict_of_data(guild_id)
         for user_id in guild_dict:
             if 'iracing_id' in guild_dict[user_id]:
-                await self.update_user_data(user_id, guild_id, (guild_dict[user_id]['iracing_id']))
+                await self.update_leaderboard_data(user_id, guild_id, (guild_dict[user_id]['iracing_id']))
 
         await ctx.send('Successfully updated user data')
 
@@ -279,6 +279,10 @@ class Iracing(commands.Cog):
         print(json.dumps(iratings.__dict__))
 
         save_irating(user_id, guild_id, iratings)
+
+    async def update_leaderboard_data(self, user_id, guild_id, iracing_id):
+        await self.update_career_stats(user_id, guild_id, iracing_id)
+        await self.save_iratings(user_id, guild_id)
 
     async def update_user_data(self, user_id, guild_id, iracing_id):
         await self.update_last_races(user_id, guild_id, iracing_id)
