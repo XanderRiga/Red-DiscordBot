@@ -155,16 +155,21 @@ class Iracing(commands.Cog):
         super().__init__()
         self.irw = iRWebStats()
         self.all_series = []
+        self.logged_in = False
 
-    @commands.command()
-    async def initialize(self, ctx):
-        await self.irw.login(os.getenv("IRACING_USERNAME"), os.getenv("IRACING_PASSWORD"))
-        self.all_series = await self.irw.all_seasons()
-        await ctx.send("iRacing module is loaded!")
+    async def initialize(self):
+        if not self.logged_in:
+            await self.irw.login(os.getenv("IRACING_USERNAME"), os.getenv("IRACING_PASSWORD"))
+            self.logged_in = True
+
+        if not self.all_series:
+            self.all_series = await self.irw.all_seasons()
 
     @commands.command()
     async def recentraces(self, ctx, *, iracing_id=None):
         """Gives the recent race data from the iRacing ID passed in"""
+        await self.initialize()
+
         user_id = str(ctx.author.id)
         guild_id = str(ctx.guild.id)
         if not iracing_id:
@@ -187,6 +192,8 @@ class Iracing(commands.Cog):
     @commands.command()
     async def yearlystats(self, ctx, *, iracing_id=None):
         """Gives the yearly data from the iRacing ID passed in"""
+        await self.initialize()
+
         user_id = str(ctx.author.id)
         guild_id = str(ctx.guild.id)
         if not iracing_id:
@@ -206,6 +213,8 @@ class Iracing(commands.Cog):
     @commands.command()
     async def careerstats(self, ctx, *, iracing_id=None):
         """Gives the career data from the iRacing ID passed in"""
+        await self.initialize()
+
         user_id = str(ctx.author.id)
         guild_id = str(ctx.guild.id)
         if not iracing_id:
@@ -225,6 +234,8 @@ class Iracing(commands.Cog):
     @commands.command()
     async def saveid(self, ctx, *, iracing_id):
         """Save your iRacing ID with to your Discord ID"""
+        await self.initialize()
+
         user_id = str(ctx.author.id)
         guild_id = str(ctx.guild.id)
 
@@ -236,6 +247,8 @@ class Iracing(commands.Cog):
         """Displays a leaderboard of the users who have used `!saveid`.
         If the data is not up to date, try `!update` first.
         The categories are `road`, `oval`, `dirtroad`, and `dirtoval`"""
+        await self.initialize()
+
         if category not in ['road', 'oval', 'dirtroad', 'dirtoval']:
             await ctx.send('Please try again with one of these categories: `road`, `oval`, `dirtroad`, `dirtoval`')
             return
@@ -256,6 +269,8 @@ class Iracing(commands.Cog):
 
     @commands.command()
     async def update(self, ctx):
+        await self.initialize()
+
         await ctx.send('Updating all user data, this might take a few minutes')
         guild_id = ctx.guild.id
         guild_dict = get_dict_of_data(guild_id)
