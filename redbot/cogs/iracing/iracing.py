@@ -307,6 +307,7 @@ class Iracing(commands.Cog):
 
     async def update_last_races(self, user_id, guild_id, iracing_id):
         races_stats_list = await self.irw.lastrace_stats(iracing_id)
+        print('recent races for user: ' + str(races_stats_list))
         if races_stats_list:
             print('found a races stats list for user: ' + str(iracing_id))
             update_user(user_id, guild_id, None, None, copy.deepcopy(races_stats_list))
