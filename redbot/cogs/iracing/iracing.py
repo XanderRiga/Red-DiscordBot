@@ -35,7 +35,7 @@ def lowercase_to_readable_categories(category):
 def print_yearly_stats(yearly_stats, iracing_id):
     string = 'Yearly Data for user: ' + str(iracing_id) + '\n\n'
     string += 'Year'.ljust(6) + \
-              'Category'.ljust(10) + \
+              'Category'.ljust(11) + \
               'Starts'.ljust(8) + \
               'Top 5s'.ljust(8) + \
               'Wins'.ljust(8) + \
@@ -49,7 +49,7 @@ def print_yearly_stats(yearly_stats, iracing_id):
 
     for yearly_stat in yearly_stats:
         string += str(yearly_stat.year).ljust(6) + \
-                  yearly_stat.category.ljust(10) + \
+                  yearly_stat.category.ljust(11) + \
                   str(yearly_stat.starts).ljust(8) + \
                   str(yearly_stat.top5).ljust(8) + \
                   str(yearly_stat.wins).ljust(8) + \
