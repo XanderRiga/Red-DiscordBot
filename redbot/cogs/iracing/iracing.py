@@ -123,7 +123,7 @@ def print_leaderboard(user_data_list, guild, category):
 
 def print_career_stats(career_stats, iracing_id):
     string = 'Career Data for user: ' + str(iracing_id) + '\n\n'
-    string += 'Category'.ljust(10) + \
+    string += 'Category'.ljust(11) + \
               'Starts'.ljust(8) + \
               'Top 5s'.ljust(8) + \
               'Wins'.ljust(8) + \
@@ -136,7 +136,7 @@ def print_career_stats(career_stats, iracing_id):
               '---------------------\n'
 
     for career_stat in career_stats:
-        string += career_stat.category.ljust(10) + \
+        string += career_stat.category.ljust(11) + \
                   str(career_stat.starts).ljust(8) + \
                   str(career_stat.top5).ljust(8) + \
                   str(career_stat.wins).ljust(8) + \
@@ -151,19 +151,26 @@ def print_career_stats(career_stats, iracing_id):
 
 class Iracing(commands.Cog):
     """A cog that can give iRacing data about users"""
+
     def __init__(self):
         super().__init__()
-        self.irw = iRWebStats()
+        self.irw = iRWebStats(os.getenv("IRACING_USERNAME"), os.getenv("IRACING_PASSWORD"))
         self.all_series = []
-        self.logged_in = False
 
     async def initialize(self):
-        if not self.logged_in:
-            await self.irw.login(os.getenv("IRACING_USERNAME"), os.getenv("IRACING_PASSWORD"))
-            self.logged_in = True
+        if not self.irw.logged:
+            await self.irw.login()
 
         if not self.all_series:
             self.all_series = await self.irw.all_seasons()
+
+    async def force_login(self):
+        await self.irw.login()
+
+    @commands.command()
+    async def getseriesdata(self, ctx):
+        self.all_series = await self.irw.all_seasons()
+        await ctx.send('Successfully got all current series data')
 
     @commands.command()
     async def recentraces(self, ctx, *, iracing_id=None):
@@ -182,12 +189,9 @@ class Iracing(commands.Cog):
         races_stats_list = await self.update_last_races(user_id, guild_id, iracing_id)
 
         if races_stats_list:
-            print('sending recent races for: ' + str(iracing_id))
             await ctx.send(self.print_recent_races(races_stats_list, iracing_id))
         else:
-            print('races stats list not found: ' + str(iracing_id))
-            print(races_stats_list)
-            await ctx.send('No recent races found for user: ' + str(iracing_id))
+            await ctx.send('Recent races not found for user: ' + iracing_id)
 
     @commands.command()
     async def yearlystats(self, ctx, *, iracing_id=None):
