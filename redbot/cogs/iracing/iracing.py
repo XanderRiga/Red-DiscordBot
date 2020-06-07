@@ -273,6 +273,7 @@ class Iracing(commands.Cog):
 
     @commands.command()
     async def update(self, ctx):
+        """Update all users career stats and iratings for building a current leaderboard"""
         await self.initialize()
 
         await ctx.send('Updating all user data, this might take a few minutes')
@@ -280,9 +281,31 @@ class Iracing(commands.Cog):
         guild_dict = get_dict_of_data(guild_id)
         for user_id in guild_dict:
             if 'iracing_id' in guild_dict[user_id]:
-                await self.update_leaderboard_data(user_id, guild_id, (guild_dict[user_id]['iracing_id']))
+                guild_dict = await self.update_user_in_dict(user_id, guild_dict)
+
+        set_guild_data(guild_id, guild_dict)
 
         await ctx.send('Successfully updated user data')
+
+    async def update_user_in_dict(self, user_id, guild_dict):
+        """This updates a user inside the dict without saving to any files"""
+        iracing_id = guild_dict[user_id]['iracing_id']
+        career_stats_list = await self.irw.career_stats(iracing_id)
+        guild_dict[user_id]['career_stats'] = list(map(lambda x: x.__dict__, career_stats_list))
+
+        oval_irating = await self.get_irating(iracing_id, IRATING_OVAL_CHART)
+        road_irating = await self.get_irating(iracing_id, IRATING_ROAD_CHART)
+        dirt_oval_irating = await self.get_irating(iracing_id, IRATING_DIRT_OVAL_CHART)
+        dirt_road_irating = await self.get_irating(iracing_id, IRATING_DIRT_ROAD_CHART)
+
+        iratings = Iratings(oval_irating, road_irating, dirt_road_irating, dirt_oval_irating)
+
+        guild_dict[user_id]['oval_irating'] = iratings.oval
+        guild_dict[user_id]['road_irating'] = iratings.road
+        guild_dict[user_id]['dirt_road_irating'] = iratings.dirt
+        guild_dict[user_id]['dirt_oval_irating'] = iratings.dirtoval
+
+        return guild_dict
 
     async def save_iratings(self, user_id, guild_id):
         iracing_id = get_user_iracing_id(user_id, guild_id)
@@ -300,12 +323,6 @@ class Iracing(commands.Cog):
         save_irating(user_id, guild_id, iratings)
 
     async def update_leaderboard_data(self, user_id, guild_id, iracing_id):
-        await self.update_career_stats(user_id, guild_id, iracing_id)
-        await self.save_iratings(user_id, guild_id)
-
-    async def update_user_data(self, user_id, guild_id, iracing_id):
-        await self.update_last_races(user_id, guild_id, iracing_id)
-        await self.update_yearly_stats(user_id, guild_id, iracing_id)
         await self.update_career_stats(user_id, guild_id, iracing_id)
         await self.save_iratings(user_id, guild_id)
 

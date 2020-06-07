@@ -46,6 +46,11 @@ def update_user(user_id, guild_id, career_stats_list, yearly_stats_list, recent_
     set_user_data(user_id, guild_id, user_data)
 
 
+def set_guild_data(guild_id, guild_dict):
+    with open(file_path(guild_id), 'w') as file:
+        json.dump(guild_dict, file)
+
+
 def set_user_data(user_id, guild_id, user_data):
     ensure_file_exists(guild_id)
 
