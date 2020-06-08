@@ -100,10 +100,10 @@ def print_leaderboard(user_data_list, guild, category):
                 if career_stat.category == 'Oval':
                     career_stats = career_stat
             elif category == 'dirtroad':
-                if career_stat.category == 'Dirt+Road':
+                if career_stat.category == 'Dirt Road':
                     career_stats = career_stat
             elif category == 'dirtoval':
-                if career_stat.category == 'Dirt+Oval':
+                if career_stat.category == 'Dirt Oval':
                     career_stats = career_stat
 
         if career_stats:
