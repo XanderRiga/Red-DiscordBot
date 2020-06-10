@@ -62,8 +62,10 @@ def print_yearly_stats(yearly_stats, iracing_id):
     return add_backticks(string)
 
 
-def print_leaderboard(user_data_list, guild, category):
-    string = 'iRacing ' + lowercase_to_readable_categories(category) + ' Leaderboard' + '\n\n'
+def print_leaderboard(user_data_list, guild, category, yearly=False):
+    type_string = 'Yearly' if yearly else 'Career'
+
+    string = 'iRacing ' + lowercase_to_readable_categories(category) + ' ' + type_string + ' Leaderboard' + '\n\n'
     string += 'Racer'.ljust(16) + \
               'Starts'.ljust(8) + \
               'iRating'.ljust(16) + \
@@ -79,7 +81,10 @@ def print_leaderboard(user_data_list, guild, category):
 
     for item in user_data_list:
         member = discord.utils.find(lambda m: m.id == int(item[0]), guild.members)
-        career_stats_list = list(map(lambda x: CareerStats(x), item[-1]['career_stats']))
+        if yearly:
+            stats_list = list(map(lambda x: YearlyStats(x), item[-1]['yearly_stats']))
+        else:
+            stats_list = list(map(lambda x: CareerStats(x), item[-1]['career_stats']))
 
         irating = 0
         if category == 'road':
@@ -92,19 +97,19 @@ def print_leaderboard(user_data_list, guild, category):
             irating = item[-1]['dirt_oval_irating']
 
         career_stats = None
-        for career_stat in career_stats_list:
+        for stat in stats_list:
             if category == 'road':
-                if career_stat.category == 'Road':
-                    career_stats = career_stat
+                if stat.category == 'Road':
+                    career_stats = stat
             elif category == 'oval':
-                if career_stat.category == 'Oval':
-                    career_stats = career_stat
+                if stat.category == 'Oval':
+                    career_stats = stat
             elif category == 'dirtroad':
-                if career_stat.category == 'Dirt Road':
-                    career_stats = career_stat
+                if stat.category == 'Dirt Road':
+                    career_stats = stat
             elif category == 'dirtoval':
-                if career_stat.category == 'Dirt Oval':
-                    career_stats = career_stat
+                if stat.category == 'Dirt Oval':
+                    career_stats = stat
 
         if career_stats:
             string += member.name.ljust(16) + \
@@ -247,11 +252,12 @@ class Iracing(commands.Cog):
         await ctx.send('iRacing ID successfully saved')
 
     @commands.command()
-    async def leaderboard(self, ctx, category='road'):
+    async def leaderboard(self, ctx, category='road', type='career'):
         """Displays a leaderboard of the users who have used `!saveid`.
         If the data is not up to date, try `!update` first.
-        The categories are `road`, `oval`, `dirtroad`, and `dirtoval`"""
-        await self.initialize()
+        The categories are `road`, `oval`, `dirtroad`, and `dirtoval` and
+        the types are `career` and `yearly`"""
+        is_yearly = (type != 'career')
 
         if category not in ['road', 'oval', 'dirtroad', 'dirtoval']:
             await ctx.send('Please try again with one of these categories: `road`, `oval`, `dirtroad`, `dirtoval`')
@@ -260,16 +266,16 @@ class Iracing(commands.Cog):
         guild_dict = get_dict_of_data(ctx.guild.id)
         if category == 'road':
             sorted_list = sorted(guild_dict.items(), key=lambda x: int(x[1]['road_irating']), reverse=True)
-            await ctx.send(print_leaderboard(sorted_list, ctx.guild, category))
+            await ctx.send(print_leaderboard(sorted_list, ctx.guild, category, is_yearly))
         elif category == 'oval':
             sorted_list = sorted(guild_dict.items(), key=lambda x: int(x[1]['oval_irating']), reverse=True)
-            await ctx.send(print_leaderboard(sorted_list, ctx.guild, category))
+            await ctx.send(print_leaderboard(sorted_list, ctx.guild, category, is_yearly))
         elif category == 'dirtroad':
             sorted_list = sorted(guild_dict.items(), key=lambda x: int(x[1]['dirt_road_irating']), reverse=True)
-            await ctx.send(print_leaderboard(sorted_list, ctx.guild, category))
+            await ctx.send(print_leaderboard(sorted_list, ctx.guild, category, is_yearly))
         elif category == 'dirtoval':
             sorted_list = sorted(guild_dict.items(), key=lambda x: int(x[1]['dirt_oval_irating']), reverse=True)
-            await ctx.send(print_leaderboard(sorted_list, ctx.guild, category))
+            await ctx.send(print_leaderboard(sorted_list, ctx.guild, category, is_yearly))
 
     @commands.command()
     async def update(self, ctx):
@@ -291,7 +297,12 @@ class Iracing(commands.Cog):
         """This updates a user inside the dict without saving to any files"""
         iracing_id = guild_dict[user_id]['iracing_id']
         career_stats_list = await self.irw.career_stats(iracing_id)
-        guild_dict[user_id]['career_stats'] = list(map(lambda x: x.__dict__, career_stats_list))
+        if career_stats_list:
+            guild_dict[user_id]['career_stats'] = list(map(lambda x: x.__dict__, career_stats_list))
+
+        yearly_stats_list = await self.irw.yearly_stats(iracing_id)
+        if yearly_stats_list:
+            guild_dict[user_id]['yearly_stats'] = list(map(lambda x: x.__dict__, yearly_stats_list))
 
         oval_irating = await self.get_irating(iracing_id, IRATING_OVAL_CHART)
         road_irating = await self.get_irating(iracing_id, IRATING_ROAD_CHART)
